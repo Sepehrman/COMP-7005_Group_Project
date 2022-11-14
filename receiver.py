@@ -43,7 +43,7 @@ def setup_receiver_cmd_request() -> ReceiverRequest:
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--port", help="The port in which the program should run. Defaults to 8000",
                         required=False, default=DEFAULT_PORT, type=int)
-    parser.add_argument("-o", "--display", help="IP Address of the Display host", default=SERVER_HOST)
+    parser.add_argument("-i", "--display", help="IP Address of the Display host", default=SERVER_HOST)
     try:
         args = parser.parse_args()
         req = ReceiverRequest()

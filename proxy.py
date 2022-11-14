@@ -34,17 +34,14 @@ def execute_requests(req: ProxyRequest):
         s.bind((req.previous_host, req.port))
         s.listen(MAX_INCOMING_CONNECTIONS)
 
-        # print(f"[LOG] Listening as {req.previous_host}:{req.port}")
-        # accepting = True
         client_socket, address = s.accept()
         print(f"[LOG] {address} has connnected.")
-        while True:
 
-            received_message = client_socket.recv(1024).decode()
+        received_message = client_socket.recv(1024).decode()
 
-            if received_message:
-                client_socket.send(bytes(received_message.upper(), 'utf-8'))
-                print(f'Sending {received_message}')
+        if received_message:
+            client_socket.send(bytes(received_message.upper(), 'utf-8'))
+            print(f'Sending {received_message}')
         client_socket.close()
         s.close()
 
