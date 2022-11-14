@@ -1,20 +1,29 @@
-class ServerRequest:
+class SenderRequest:
 
     def __init__(self):
         self.port = None
-        self.private_key = None
-        self.public_key = None
+        self.next_host = None
 
     def __str__(self):
-        return f"ServerRequest: port: {self.port}, private_key: {self.private_key}, public_key {self.public_key}"
+        return f"SenderRequest: port: {self.port}, next_host: {self.next_host}"
 
 
-class ClientRequest:
+class ProxyRequest:
 
     def __init__(self):
-        self.ip_address = None
-        self.files = None
         self.port = None
+        self.previous_host = None
+        self.next_host = None
 
     def __str__(self):
-        return f"ClientRequest: ip_address: {self.ip_address}, port {self.port}"
+        return f"ProxyRequest: port: {self.port}, previous_host: {self.previous_host}, next_host {self.next_host}"
+
+
+class ReceiverRequest:
+
+    def __init__(self):
+        self.port = None
+        self.display_host = None
+
+    def __str__(self):
+        return f"ReceiverRequest: port: {self.port}, display_host: {self.display_host}"

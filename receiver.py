@@ -3,10 +3,10 @@ import os
 import socket
 import ssl
 
-from request import ServerRequest
+from request import ReceiverRequest
 
 SERVER_HOST = socket.gethostbyname(socket.gethostname())
-SERVER_PORT = 5001
+DEFAULT_PORT = 5000
 # receive 4096 bytes each time
 BUFFER_SIZE = 4096
 SEPARATOR = "<SEPARATOR>"
@@ -14,7 +14,7 @@ MAX_INCOMING_CONNECTIONS = 999
 DEFAULT_PATH = './server/downloads/'
 
 
-def create_socket(req):
+def execute_requests(req):
     try:
 
         s = socket.socket()
@@ -28,10 +28,10 @@ def create_socket(req):
         while accepting:
 
             received_message = client_socket.recv(1024).decode()
-
-            if received_message:
-                client_socket.send(bytes(received_message.upper(), 'utf-8'))
-                print(received_message)
+            print(f"Display: {received_message}")
+            # if received_message:
+            #     client_socket.send(bytes(received_message.upper(), 'utf-8'))
+            #     print(received_message)
         client_socket.close()
         s.close()
 
@@ -39,19 +39,16 @@ def create_socket(req):
         print(f"Error with {e}")
 
 
-def init_server(req: ServerRequest):
-    create_socket(req)
-
-
-def setup_server_cmd_request() -> ServerRequest:
+def setup_receiver_cmd_request() -> ReceiverRequest:
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--port", help="The port in which the program should run. Defaults to 8000",
-                        required=False, default=SERVER_PORT, type=int)
-
+                        required=False, default=DEFAULT_PORT, type=int)
+    parser.add_argument("-o", "--display", help="IP Address of the Display host", default=SERVER_HOST)
     try:
         args = parser.parse_args()
-        req = ServerRequest()
+        req = ReceiverRequest()
         req.port = args.port
+        req.display_host = args.display
 
         return req
     except Exception as e:
@@ -62,8 +59,8 @@ def setup_server_cmd_request() -> ServerRequest:
 
 
 def main():
-    request = setup_server_cmd_request()
-    init_server(request)
+    request = setup_receiver_cmd_request()
+    execute_requests(request)
 
 
 if __name__ == "__main__":
