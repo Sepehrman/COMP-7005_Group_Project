@@ -1,9 +1,11 @@
+#!/usr/bin/python'
 import argparse
 import socket
 
 from request import ProxyRequest
 DEFAULT_PORT = 5000
 MAX_INCOMING_CONNECTIONS = 999
+
 
 def setup_proxy_cmd_request() -> ProxyRequest:
     parser = argparse.ArgumentParser()
@@ -36,8 +38,9 @@ def execute_requests(req: ProxyRequest):
 
         client_socket, address = s.accept()
         print(f"[LOG] {address} has connnected.")
-
         received_message = client_socket.recv(1024).decode()
+
+
 
         if received_message:
             client_socket.send(bytes(received_message.upper(), 'utf-8'))
