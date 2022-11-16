@@ -1,4 +1,7 @@
 #!/usr/bin/python
+# Server
+
+
 import argparse
 import os
 import socket
@@ -6,8 +9,9 @@ import ssl
 
 from request import ReceiverRequest
 
-SERVER_HOST = socket.gethostbyname(socket.gethostname())
-DEFAULT_PORT = 5000
+SERVER_HOST = '127.0.0.1'
+#socket.gethostbyname(socket.gethostname())
+DEFAULT_PORT = 8000
 # receive 4096 bytes each time
 BUFFER_SIZE = 4096
 SEPARATOR = "<SEPARATOR>"
@@ -32,7 +36,8 @@ def execute_requests(req):
             print(f"Display: {received_message}")
             if received_message:
                 print(f"'{address}': {received_message}")
-                client_socket.send(received_message.encode())
+                altered_received_message = received_message.upper()
+                client_socket.send(altered_received_message.encode())
 
         client_socket.close()
         s.close()
@@ -48,7 +53,7 @@ def setup_receiver_cmd_request() -> ReceiverRequest:
     try:
         args = parser.parse_args()
         req = ReceiverRequest()
-        req.display_host = args.display
+        req.port = args.port
 
         return req
     except Exception as e:
