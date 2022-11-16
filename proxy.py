@@ -1,4 +1,4 @@
-#!/usr/bin/python'
+#!/usr/bin/python
 import argparse
 import socket
 
@@ -39,8 +39,7 @@ def execute_requests(req: ProxyRequest):
         client_socket, address = s.accept()
         print(f"[LOG] {address} has connnected.")
         received_message = client_socket.recv(1024).decode()
-
-
+        s.connect((req.next_host, req.port))
 
         if received_message:
             client_socket.send(bytes(received_message.upper(), 'utf-8'))
