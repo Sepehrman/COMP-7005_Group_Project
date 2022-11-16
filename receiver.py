@@ -30,9 +30,10 @@ def execute_requests(req):
 
             received_message = client_socket.recv(1024).decode()
             print(f"Display: {received_message}")
-            # if received_message:
-            #     client_socket.send(bytes(received_message.upper(), 'utf-8'))
-            #     print(received_message)
+            if received_message:
+                print(f"'{address}': {received_message}")
+                client_socket.send(received_message.encode())
+
         client_socket.close()
         s.close()
 
@@ -44,11 +45,9 @@ def setup_receiver_cmd_request() -> ReceiverRequest:
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--port", help="The port in which the program should run. Defaults to 8000",
                         required=False, default=DEFAULT_PORT, type=int)
-    parser.add_argument("-i", "--display", help="IP Address of the Display host", default=SERVER_HOST)
     try:
         args = parser.parse_args()
         req = ReceiverRequest()
-        req.port = args.port
         req.display_host = args.display
 
         return req

@@ -42,13 +42,14 @@ def execute_requests(req: ProxyRequest):
         s.connect((req.next_host, req.port))
 
         if received_message:
-            client_socket.send(bytes(received_message.upper(), 'utf-8'))
+            s.send(bytes(received_message.upper(), 'utf-8'))
             print(f'Sending {received_message}')
         client_socket.close()
         s.close()
 
     except Exception as e:
         print(f"Error with {e}")
+
 
 def main():
     requests = setup_proxy_cmd_request()
