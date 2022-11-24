@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# Client
+
 import argparse
 import socket
 
@@ -6,7 +8,7 @@ from request import SenderRequest
 
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 4096
-DEFAULT_PORT = 5000
+DEFAULT_PORT = 8000
 
 
 def setup_sender_cmd_request() -> SenderRequest:
@@ -31,10 +33,11 @@ def execute_request(req: SenderRequest):
     s = socket.socket()
     try:
         s.connect((req.next_host, DEFAULT_PORT))
-
         while True:
             message = input()
             s.send(message.encode('utf-8'))
+            reply = s.recv(1024).decode()
+            print(reply)
     except TimeoutError as e:
         print(f'MUST CALL TIMEOUT FUNCTION HERE')
     except Exception as e:

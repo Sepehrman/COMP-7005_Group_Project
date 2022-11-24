@@ -23,7 +23,7 @@ class ReceiverRequest:
 
     def __init__(self):
         self.port = None
-        self.display_host = None
+        # self.display_host = None
 
     def __str__(self):
         return f"ReceiverRequest: port: {self.port}, display_host: {self.display_host}"
