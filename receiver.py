@@ -29,15 +29,13 @@ def execute_requests(req):
         print(f"[LOG] Listening as {SERVER_HOST}:{req.port}")
         accepting = True
         client_socket, address = s.accept()
-        print(f"[LOG] {address} has connnected.")
         while accepting:
-
+            print(f"[LOG] {address} has connnected.")
             received_message = client_socket.recv(1024).decode()
             print(f"Display: {received_message}")
-            if received_message:
-                print(f"'{address}': {received_message}")
-                altered_received_message = received_message.upper()
-                client_socket.send(altered_received_message.encode())
+            print(f"'{address}': {received_message}")
+            altered_received_message = received_message.upper()
+            client_socket.send(altered_received_message.encode())
 
         client_socket.close()
         s.close()

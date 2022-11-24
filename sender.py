@@ -33,13 +33,11 @@ def execute_request(req: SenderRequest):
     s = socket.socket()
     try:
         s.connect((req.next_host, DEFAULT_PORT))
-
         while True:
             message = input()
             s.send(message.encode('utf-8'))
-            while message:
-                reply = s.recv(1024).decode()
-                print(reply)
+            reply = s.recv(1024).decode()
+            print(reply)
     except TimeoutError as e:
         print(f'MUST CALL TIMEOUT FUNCTION HERE')
     except Exception as e:
