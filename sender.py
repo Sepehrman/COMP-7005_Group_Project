@@ -27,7 +27,7 @@ def setup_sender_cmd_request() -> SenderRequest:
         req.next_host = args.stdin
         req.file = args.file
 
-        if is_file(req.file):
+        if req.file is not None and is_file(req.file):
             with open(req.file, "r") as file:
                 data = file.read()
                 req.payload = data
