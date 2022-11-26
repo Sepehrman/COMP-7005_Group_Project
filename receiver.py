@@ -7,6 +7,7 @@ import os
 import socket
 import ssl
 
+from packet import Packet
 from request import ReceiverRequest
 
 SERVER_HOST = '127.0.0.1'
@@ -31,17 +32,16 @@ def execute_requests(req):
         client_socket, address = s.accept()
         while accepting:
             print(f"[LOG] {address} has connnected.")
-            received_message = client_socket.recv(1024).decode()
-            print(f"'{address}': {received_message}")
-            altered_received_message = received_message.upper()
-            client_socket.send(altered_received_message.encode())
+            packet = Packet()
+            packet.data = client_socket.recv(1024).decode()
+            print(f"'{address}': {packet.data}")
+            client_socket.send(packet.ack.encode('utf-8'))
 
-        # client_socket.close()
+        # client_socket.close()Packet
         s.close()
 
     except Exception as e:
         print(f"Error with {e}")
-
 
 def setup_receiver_cmd_request() -> ReceiverRequest:
     parser = argparse.ArgumentParser()

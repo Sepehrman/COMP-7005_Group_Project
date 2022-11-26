@@ -4,6 +4,7 @@
 import argparse
 import socket
 
+from packet import Packet
 from request import SenderRequest
 import os.path
 
@@ -27,7 +28,6 @@ def setup_sender_cmd_request() -> SenderRequest:
         req.file = args.file
 
         if is_file(req.file):
-            print("is file")
             with open(req.file, "r") as file:
                 data = file.read()
                 req.payload = data
@@ -47,12 +47,14 @@ def execute_request(req: SenderRequest):
         s.connect((req.next_host, DEFAULT_PORT))
         s.settimeout(10)
         while True:
+            packet = Packet()
             if req.payload:
                 s.send(req.payload.encode('utf-8'))
-            message = input()
-            s.send(message.encode('utf-8'))
-            reply = s.recv(1024).decode()
-            print(reply)
+            packet.data = input()
+
+            s.send(packet.data.encode('utf-8'))
+            packet.ack = s.recv(1024).decode()
+            print(packet.ack)
     except TimeoutError as e:
         print("Handling Timeout")
 
