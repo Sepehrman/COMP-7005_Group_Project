@@ -32,12 +32,11 @@ def execute_requests(req):
         while accepting:
             print(f"[LOG] {address} has connnected.")
             received_message = client_socket.recv(1024).decode()
-            print(f"Display: {received_message}")
             print(f"'{address}': {received_message}")
             altered_received_message = received_message.upper()
             client_socket.send(altered_received_message.encode())
 
-        client_socket.close()
+        # client_socket.close()
         s.close()
 
     except Exception as e:

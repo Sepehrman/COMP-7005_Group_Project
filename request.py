@@ -3,9 +3,11 @@ class SenderRequest:
     def __init__(self):
         self.port = None
         self.next_host = None
+        self.file = None
+        self.payload = None
 
     def __str__(self):
-        return f"SenderRequest: port: {self.port}, next_host: {self.next_host}"
+        return f"SenderRequest: port: {self.port}, next_host: {self.next_host}, file: {self.file}, payload: {self.payload}"
 
 
 class ProxyRequest:
