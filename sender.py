@@ -41,13 +41,14 @@ def setup_sender_cmd_request() -> SenderRequest:
 def is_file(file):
     return os.path.isfile(file)
 
+
 def execute_request(req: SenderRequest):
     s = socket.socket()
+    packet = Packet()
+    s.settimeout(10)
     try:
         s.connect((req.next_host, DEFAULT_PORT))
-        s.settimeout(10)
         while True:
-            packet = Packet()
             if req.payload:
                 s.send(req.payload.encode('utf-8'))
             packet.data = input()
@@ -57,6 +58,7 @@ def execute_request(req: SenderRequest):
             print(packet.ack)
     except TimeoutError as e:
         print("Handling Timeout")
+        handle_timeout_error(s, packet)
 
     except Exception as e:
         print(f'Error: {e}')
@@ -64,9 +66,8 @@ def execute_request(req: SenderRequest):
         s.close()
 
 
-
-def handle_timeout_error():
-    pass
+def handle_timeout_error(sock, packet):
+    sock.send(packet.data.encode('utf-8'))
 
 
 def main():
