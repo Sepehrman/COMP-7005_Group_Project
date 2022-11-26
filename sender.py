@@ -57,7 +57,6 @@ def execute_request(req: SenderRequest):
             packet.ack = s.recv(1024).decode()
             print(packet.ack)
     except TimeoutError as e:
-        print("Handling Timeout")
         handle_timeout_error(s, packet)
 
     except Exception as e:
@@ -67,6 +66,7 @@ def execute_request(req: SenderRequest):
 
 
 def handle_timeout_error(sock, packet):
+    print("Handling Timeout")
     sock.send(packet.data.encode('utf-8'))
 
 
