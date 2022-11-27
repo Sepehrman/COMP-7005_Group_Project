@@ -4,6 +4,7 @@
 
 import argparse
 import os
+import pickle
 import socket
 import ssl
 
@@ -30,18 +31,22 @@ def execute_requests(req):
         print(f"[LOG] Listening as {SERVER_HOST}:{req.port}")
         accepting = True
         client_socket, address = s.accept()
+        print(f"[LOG] {address} has connnected.")
         while accepting:
-            print(f"[LOG] {address} has connnected.")
-            packet = Packet()
-            packet.data = client_socket.recv(1024).decode()
-            print(f"'{address}': {packet.data}")
-            client_socket.send(packet.ack.encode('utf-8'))
-
-        # client_socket.close()Packet
+            packet = pickle.loads(client_socket.recv(1024))
+            print(f"'{address[0]}': {packet.data}")
+            send_back_ack(client_socket, packet)
         s.close()
 
     except Exception as e:
-        print(f"Error with {e}")
+        print(f"Error: {e}")
+        quit()
+
+
+def send_back_ack(csocket, packet):
+    packet.ack = "ACK"
+    csocket.send(pickle.dumps(packet))
+
 
 def setup_receiver_cmd_request() -> ReceiverRequest:
     parser = argparse.ArgumentParser()

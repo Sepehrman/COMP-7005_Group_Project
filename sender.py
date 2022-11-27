@@ -7,6 +7,7 @@ import socket
 from packet import Packet
 from request import SenderRequest
 import os.path
+import pickle
 
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 4096
@@ -52,17 +53,27 @@ def execute_request(req: SenderRequest):
             if req.payload:
                 s.send(req.payload.encode('utf-8'))
             packet.data = input()
+            send_packet(s, packet)
+            receive_ack(s)
 
-            s.send(packet.data.encode('utf-8'))
-            packet.ack = s.recv(1024).decode()
-            print(packet.ack)
     except TimeoutError as e:
         handle_timeout_error(s, packet)
-
     except Exception as e:
         print(f'Error: {e}')
     finally:
         s.close()
+
+
+def receive_ack(sock):
+    packet = pickle.loads(sock.recv(1024))
+    if packet.ack == "ACK":
+        print("ACK")
+    else:
+        print("No ACK Received")
+
+
+def send_packet(s, packet):
+    s.send(pickle.dumps(packet))
 
 
 def handle_timeout_error(sock, packet):
@@ -72,7 +83,6 @@ def handle_timeout_error(sock, packet):
 
 def main():
     request = setup_sender_cmd_request()
-    print(request)
     execute_request(request)
 
 
