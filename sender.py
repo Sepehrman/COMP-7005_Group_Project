@@ -8,6 +8,7 @@ from packet import Packet
 from request import SenderRequest
 import os.path
 import pickle
+import os
 
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 4096
@@ -53,8 +54,10 @@ def execute_request(req: SenderRequest):
             if req.payload:
                 s.send(req.payload.encode('utf-8'))
             packet.data = input()
+            os.system('cls' if os.name == 'nt' else 'clear')
             send_packet(s, packet)
             receive_ack(s)
+            print(packet)
 
     except TimeoutError as e:
         handle_timeout_error(s, packet)
@@ -82,6 +85,7 @@ def handle_timeout_error(sock, packet):
 
 
 def main():
+    os.system('cls' if os.name == 'nt' else 'clear')
     request = setup_sender_cmd_request()
     execute_request(request)
 

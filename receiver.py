@@ -31,11 +31,13 @@ def execute_requests(req):
         print(f"[LOG] Listening as {SERVER_HOST}:{req.port}")
         accepting = True
         client_socket, address = s.accept()
-        print(f"[LOG] {address} has connnected.")
+        print(f"[LOG] {address} has connected.")
         while accepting:
             packet = pickle.loads(client_socket.recv(1024))
+            os.system('cls' if os.name == 'nt' else 'clear')
             print(f"'{address[0]}': {packet.data}")
             send_back_ack(client_socket, packet)
+            print(packet)
         s.close()
 
     except Exception as e:
