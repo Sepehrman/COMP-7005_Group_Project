@@ -7,4 +7,4 @@ class Packet:
 
     def __str__(self):
         return f'Data: {self.data}\nACK: {self.ack}\n' \
-               f'% ACK: ______\n%Data: ________'
+               f'% ACK: ______\n% Data: ________'
