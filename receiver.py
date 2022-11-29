@@ -1,43 +1,62 @@
 #!/usr/bin/python
 # Server
 
+'''
+
+This is the receiver (server). The receiver starts up first, waits for connections,
+receives data and writes it to console. The server also sends acks back for each packet received.
+Maintains a list of stats and takes cmd line args for port to receive from.
+
+'''
+
 
 import argparse
 import os
 import pickle
 import socket
-import ssl
 
 from packet import Packet
 from request import ReceiverRequest
 
-SERVER_HOST = '127.0.0.1'
-#socket.gethostbyname(socket.gethostname())
-DEFAULT_PORT = 8000
-# receive 4096 bytes each time
-BUFFER_SIZE = 4096
-SEPARATOR = "<SEPARATOR>"
+SERVER_HOST = '192.168.1.138'
+DEFAULT_PORT = 9000
 MAX_INCOMING_CONNECTIONS = 999
-DEFAULT_PATH = './server/downloads/'
 
 
 def execute_requests(req):
     try:
 
+        # Create a socket object
         s = socket.socket()
-        s.bind((SERVER_HOST, req.port))
-        s.listen(MAX_INCOMING_CONNECTIONS)
+        print("Socket created!")
 
-        print(f"[LOG] Listening as {SERVER_HOST}:{req.port}")
+        # Bind socket to server host and port (default, if not provided)
+        s.bind((SERVER_HOST, req.port))
+        print("Bind complete!")
+
+        # Socket now listening
+        s.listen(MAX_INCOMING_CONNECTIONS)
+        print(f"[LOG] Socket now Listening as {SERVER_HOST}:{req.port}")
+
         accepting = True
+
+        # Accept connections
         client_socket, address = s.accept()
         print(f"[LOG] {address} has connected.")
+
         while accepting:
-            packet = pickle.loads(client_socket.recv(1024))
-            os.system('cls' if os.name == 'nt' else 'clear')
+
+            # Receive data (packet object)
+            packet = pickle.loads(client_socket.recv(2024))
+
+            # os.system('cls' if os.name == 'nt' else 'clear')
+
+            # Print to console
             print(f"'{address[0]}': {packet.data}")
+
+            # Send acks back for data received
             send_back_ack(client_socket, packet)
-            print(packet)
+
         s.close()
 
     except Exception as e:
@@ -46,20 +65,30 @@ def execute_requests(req):
 
 
 def send_back_ack(csocket, packet):
+    # Send acknowledgement packets for each data packet received.
     packet.ack = "ACK"
     csocket.send(pickle.dumps(packet))
 
 
 def setup_receiver_cmd_request() -> ReceiverRequest:
+    # Command line arguments
+
+    # Create a command line parser
     parser = argparse.ArgumentParser()
+
+    # Arguments: ./receiver.py -p 8000
     parser.add_argument("-p", "--port", help="The port in which the program should run. Defaults to 8000",
                         required=False, default=DEFAULT_PORT, type=int)
     try:
+        # Execute the parse_args() method
         args = parser.parse_args()
+
+        # Initialize receive request object
         req = ReceiverRequest()
         req.port = args.port
 
         return req
+
     except Exception as e:
         print(f"An unexpected error occurred. {e}")
         quit()
