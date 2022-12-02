@@ -17,10 +17,11 @@ And then Sender.
 import argparse
 import socket
 import pickle
+import random
 
 from request import ProxyRequest
 
-PROXY_HOST = '192.168.1.122'
+PROXY_HOST = '127.0.0.1'
 MAX_INCOMING_CONNECTIONS = 999
 
 def setup_proxy_cmd_request() -> ProxyRequest:
@@ -72,15 +73,24 @@ def execute_requests(req: ProxyRequest):
 
         client_socket, address = sender_socket.accept()
         print(f"[LOG] {address} has connnected.")
-        # drop_data_packets = int(input("Drop % data packets: "))
+        drop_data_packets = int(input("Drop % data packets [1% - 100%]: "))
+        drop_data_packets = drop_data_packets / 100
+        #print(drop_data_packets)
         # drop_ack_packets = int(input("Drop % ack packets: "))
+        # drop_ack_packets = drop_ack_packets / 100
+
+        received_packets = []
+        data_pkt = 0
 
         while True:
 
             # Receive data packets from sender
             received_message = pickle.loads(client_socket.recv(2048))
             print(received_message)
-            # Check if sender sent any data
+            received_packets.append(received_message)
+            #print(len(received_packets))
+            # for pkt in received_packets:
+
 
 
             # if there is data, send it to the receiver host
@@ -88,6 +98,7 @@ def execute_requests(req: ProxyRequest):
 
 
             ack_packet = pickle.loads(receiver_socket.recv(2048))
+            print(ack_packet)
 
             client_socket.send(pickle.dumps(ack_packet))
 

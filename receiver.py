@@ -18,7 +18,7 @@ import socket
 from packet import Packet
 from request import ReceiverRequest
 
-SERVER_HOST = '192.168.1.138'
+SERVER_HOST = '127.0.0.1'
 DEFAULT_PORT = 9000
 MAX_INCOMING_CONNECTIONS = 999
 
@@ -47,7 +47,7 @@ def execute_requests(req):
         while accepting:
 
             # Receive data (packet object)
-            packet = pickle.loads(client_socket.recv(2024))
+            packet = pickle.loads(client_socket.recv(2048))
 
             # os.system('cls' if os.name == 'nt' else 'clear')
 

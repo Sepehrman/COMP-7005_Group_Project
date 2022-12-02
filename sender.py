@@ -92,8 +92,8 @@ def execute_request(req: SenderRequest):
             print(data)
             for word in data:
                 data_packet.data = word
-                send_packet(s, data_packet)
-            s.settimeout(5)
+            send_packet(s, data_packet)
+            s.settimeout(10)
             receive_ack(s)
 
         while True:
@@ -138,7 +138,6 @@ def execute_request(req: SenderRequest):
 
 def receive_ack(sock):
     ack_packet = pickle.loads(sock.recv(1024))
-    print(ack_packet)
     if ack_packet.ack == "ACK":
         print(ack_packet)
     else:
