@@ -24,6 +24,7 @@ MAX_INCOMING_CONNECTIONS = 999
 
 
 def execute_requests(req):
+
     try:
 
         # Create a socket object
@@ -44,18 +45,25 @@ def execute_requests(req):
         client_socket, address = s.accept()
         print(f"[LOG] {address} has connected.")
 
+        data_pkt_received = 0
+        ack_pkt_sent = 0
+
         while accepting:
 
             # Receive data (packet object)
             packet = pickle.loads(client_socket.recv(2048))
-
-            # os.system('cls' if os.name == 'nt' else 'clear')
+            data_pkt_received += 1
 
             # Print to console
             print(f"'{address[0]}': {packet.data}")
 
             # Send acks back for data received
             send_back_ack(client_socket, packet)
+            ack_pkt_sent += 1
+
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print("Data packets received: {}".format(data_pkt_received))
+            print("Ack packets sent: {}".format(ack_pkt_sent))
 
         s.close()
 

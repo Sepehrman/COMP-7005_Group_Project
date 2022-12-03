@@ -83,11 +83,9 @@ def execute_requests(req: ProxyRequest):
 
 def receive_and_drop_data(client_socket, receiver_socket):
 
-    how_many_data_packets_to_drop = int(input("Drop % data packets [1% - 100%]: "))
-    drop_data_packets = how_many_data_packets_to_drop / 100
+    drop_data_packets= int(input("Drop % data packets [0% - 100%]: "))
     # print(drop_data_packets)
-    how_many_ack_packets_to_drop = int(input("Drop % ack packets [1% - 100%]: "))
-    drop_ack_packets = how_many_ack_packets_to_drop / 100
+    drop_ack_packets = int(input("Drop % ack packets [0% - 100%]: "))
 
     received_packets = []
     data_pkt = 0
@@ -109,7 +107,7 @@ def receive_and_drop_data(client_socket, receiver_socket):
         print("Data packets received: {}".format(data_pkt))
 
         # if received_message in received_packets:
-        if random.random() < drop_data_packets:
+        if random.randrange(start=0, stop=100) <= drop_data_packets:
             received_packets.remove(received_message)
             dropped_data_pkt += 1
             print("Data packets dropped: {}".format(dropped_data_pkt))
@@ -140,7 +138,7 @@ def receive_and_drop_acks(client_socket, receiver_socket, drop_ack_packets, drop
     # print(received_acks)
 
     # if received_message in received_packets:
-    if random.random() < drop_ack_packets:
+    if random.randrange(start=0, stop=100) <= drop_ack_packets:
         dropped_ack_pkt += 1
         pass
     else:
