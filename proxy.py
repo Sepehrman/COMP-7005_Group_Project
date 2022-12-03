@@ -21,7 +21,7 @@ import random
 
 from request import ProxyRequest
 
-PROXY_HOST = '127.0.0.1'
+PROXY_HOST = '192.168.1.122'
 MAX_INCOMING_CONNECTIONS = 999
 
 def setup_proxy_cmd_request() -> ProxyRequest:
@@ -73,39 +73,81 @@ def execute_requests(req: ProxyRequest):
 
         client_socket, address = sender_socket.accept()
         print(f"[LOG] {address} has connnected.")
-        drop_data_packets = int(input("Drop % data packets [1% - 100%]: "))
-        drop_data_packets = drop_data_packets / 100
-        #print(drop_data_packets)
-        # drop_ack_packets = int(input("Drop % ack packets: "))
-        # drop_ack_packets = drop_ack_packets / 100
 
-        received_packets = []
-        data_pkt = 0
+        receive_and_drop_data(client_socket, receiver_socket)
 
-        while True:
-
-            # Receive data packets from sender
-            received_message = pickle.loads(client_socket.recv(2048))
-            print(received_message)
-            received_packets.append(received_message)
-            #print(len(received_packets))
-            # for pkt in received_packets:
-
-
-
-            # if there is data, send it to the receiver host
-            receiver_socket.send(pickle.dumps(received_message))
-
-
-            ack_packet = pickle.loads(receiver_socket.recv(2048))
-            print(ack_packet)
-
-            client_socket.send(pickle.dumps(ack_packet))
-
-            # client_socket.close()
 
     except Exception as e:
         print(f"Error with {e}")
+
+
+def receive_and_drop_data(client_socket, receiver_socket):
+
+    how_many_data_packets_to_drop = int(input("Drop % data packets [1% - 100%]: "))
+    drop_data_packets = how_many_data_packets_to_drop / 100
+    # print(drop_data_packets)
+    how_many_ack_packets_to_drop = int(input("Drop % ack packets [1% - 100%]: "))
+    drop_ack_packets = how_many_ack_packets_to_drop / 100
+
+    received_packets = []
+    data_pkt = 0
+    dropped_data_pkt = 0
+    sent_data_pkt = 0
+
+    ack_pkt = 0
+    dropped_ack_pkt = 0
+    sent_ack_pkt = 0
+
+    while True:
+
+        # Receive data packets from sender
+        received_message = pickle.loads(client_socket.recv(2048))
+        print(received_message.data)
+        received_packets.append(received_message)
+        # print("Received packets list: {}" .format(received_packets))
+        data_pkt += 1
+        print("Data packets received: {}".format(data_pkt))
+
+        # if received_message in received_packets:
+        if random.random() < drop_data_packets:
+            received_packets.remove(received_message)
+            dropped_data_pkt += 1
+            print("Data packets dropped: {}".format(dropped_data_pkt))
+
+        if received_message in received_packets:
+            receiver_socket.send(pickle.dumps(received_message))
+            sent_data_pkt += 1
+            print("Data packets sent to receiver: {}".format(sent_data_pkt))
+            ack_pkt += 1
+            print("ACK packets received: {}".format(ack_pkt))
+            # print("ACK packets received: {}".format(ack_pkt))
+            dropped_ack_pkt, sent_ack_pkt = receive_and_drop_acks(client_socket, receiver_socket, drop_ack_packets, dropped_ack_pkt, sent_ack_pkt)
+            dropped_ack_pkt = dropped_ack_pkt
+            print("ACK packets dropped: {}".format(dropped_ack_pkt))
+
+            sent_ack_pkt = sent_ack_pkt
+            print("ACK packets sent to sender: {}".format(sent_ack_pkt))
+
+        #print("Data packets received: {}".format(data_pkt))
+        #
+        # print("ACK packets dropped: {}".format(dropped_ack_pkt))
+        # print("ACK packets sent to receiver: {}".format(sent_ack_pkt))
+
+
+def receive_and_drop_acks(client_socket, receiver_socket, drop_ack_packets, dropped_ack_pkt, sent_ack_pkt):
+
+    received_acks = receive_ack(receiver_socket)
+    # print(received_acks)
+
+    # if received_message in received_packets:
+    if random.random() < drop_ack_packets:
+        dropped_ack_pkt += 1
+        pass
+    else:
+        client_socket.send(pickle.dumps(received_acks))
+        sent_ack_pkt += 1
+
+    return dropped_ack_pkt, sent_ack_pkt
 
 
 def receive_ack(sock):
@@ -116,17 +158,6 @@ def receive_ack(sock):
         print("No ACK Received")
 
     return ack_packet
-
-
-# def drop_data_packets():
-#     # Randomly drop data packets from sender
-#     drop_packets = int(input("Drop % of data packets: "))
-#
-#     print(drop_packets)
-
-def list_of_stats():
-    pass
-
 
 def main():
     requests = setup_proxy_cmd_request()

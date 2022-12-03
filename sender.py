@@ -74,62 +74,16 @@ def execute_request(req: SenderRequest):
     # Create a socket object
     s = socket.socket()
 
-    # Initialize a data packet object
-    data_packet = Packet()
-
     try:
         # Check is port argument is argument
         if req.port is not None:
             s.connect((req.next_host, req.port))
+            send_packet(req, s)
         # No port argument. Default port = 8000
         else:
             s.connect((req.next_host, DEFAULT_PORT))
+            send_packet(req, s)
 
-        # If a file is provided, req.payload is data from file.
-        if req.payload:
-
-            data = req.payload.split('\n')
-            print(data)
-            for word in data:
-                data_packet.data = word
-            send_packet(s, data_packet)
-            s.settimeout(10)
-            receive_ack(s)
-
-        while True:
-
-            # No file provided. Ask user for input
-            data_packet.data = input()
-            # print(data_packet.data)
-
-            # Check if input is a file
-            if is_file(data_packet.data):
-                # Open and read file
-                with open(data_packet.data, "r") as file:
-                    data = file.read()
-                    data_packet.data = data
-
-            # os.system('cls' if os.name == 'nt' else 'clear')
-
-            # Send data packet
-            send_packet(s, data_packet)
-
-            # Set timeout for 10 seconds
-            s.settimeout(5)
-
-            ''' 
-            Timeout should be called after data is sent because it checks for subsequent 
-            socket functions to be completed before timeout is called. In other words if acks are not received within
-            10 seconds, timeout error is called. 
-            '''
-
-            # Receive ack packet
-            receive_ack(s)
-
-            # print(data_packet)
-
-    except TimeoutError as e:
-        handle_timeout_error(s, data_packet)
     except Exception as e:
         print(f'Error: {e}')
     finally:
@@ -144,9 +98,58 @@ def receive_ack(sock):
         print("No ACK Received")
 
 
-def send_packet(s, packet):
-    s.send(pickle.dumps(packet))
+def send_packet(req: SenderRequest, s):
 
+    # Initialize a data packet object
+    data_packet = Packet()
+    try:
+        # If a file is provided, req.payload is data from file.
+        if req.payload:
+
+            data = req.payload.split('\n')
+            print(data)
+            for word in data:
+                data_packet.data = word
+                send_packet(s, data_packet)
+                s.settimeout(10)
+                receive_ack(s)
+
+        #s.send(pickle.dumps(packet))
+        while True:
+
+            # No file provided. Ask user for input
+            data_packet.data = input("Please type in a string to send: ")
+            # print(data_packet.data)
+
+            # Check if input is a file
+            if is_file(data_packet.data):
+                # Open and read file
+                with open(data_packet.data, "r") as file:
+                    data = file.read()
+                    data_packet.data = data
+
+            # os.system('cls' if os.name == 'nt' else 'clear')
+
+            # Send data packet
+            s.send(pickle.dumps(data_packet))
+
+            # Set timeout for 10 seconds
+            s.settimeout(10)
+
+            ''' 
+            Timeout should be called after data is sent because it checks for subsequent 
+            socket functions to be completed before timeout is called. In other words if acks are not received within
+            10 seconds, timeout error is called. 
+            '''
+
+            # Receive ack packet
+            receive_ack(s)
+
+            # print(data_packet)
+
+    except TimeoutError as e:
+        handle_timeout_error(s, data_packet)
+        send_packet(req, s)
 
 def handle_timeout_error(sock, packet):
     # Recursive handler that keeps retransmitting data
@@ -157,7 +160,7 @@ def handle_timeout_error(sock, packet):
     try:
 
         # Retransmit data packet object
-        send_packet(sock, packet)
+        sock.send(pickle.dumps(packet))
         print("Packet retransmitted ... ")
 
         # Set timeout for 10 seconds
