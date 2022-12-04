@@ -15,6 +15,7 @@ import socket
 
 from packet import Packet
 from request import SenderRequest
+
 import os.path
 import pickle
 import os
@@ -95,10 +96,10 @@ def execute_request(req: SenderRequest):
 
 def receive_ack(sock):
     ack_packet = pickle.loads(sock.recv(1024))
-    if ack_packet.ack == "ACK":
-        print(ack_packet)
-    else:
-        print("No ACK Received")
+    # if ack_packet.ack == "ACK":
+    #     print(ack_packet)
+    # else:
+    #     print("No ACK Received")
 
 
 def send_packet(req: SenderRequest, s, ack_pkts_received, data_pkts_sent):
@@ -107,15 +108,16 @@ def send_packet(req: SenderRequest, s, ack_pkts_received, data_pkts_sent):
     data_packet = Packet()
     try:
         # If a file is provided, req.payload is data from file.
-        # if req.payload:
-        #
-        #     data = req.payload.split('\n')
-        #     print(data)
-        #     for word in data:
-        #         data_packet.data = word
-        #         send_packet(s, data_packet)
-        #         s.settimeout(10)
-        #         receive_ack(s)
+        if req.payload:
+
+            data = req.payload.split('\n')
+            #print(data)
+            for word in data:
+                data_packet.data = word
+                data_pkts_sent += 1
+                send_packet(req, s, ack_pkts_received, data_pkts_sent)
+                s.settimeout(10)
+                receive_ack(s)
 
         #s.send(pickle.dumps(packet))
 
@@ -137,6 +139,8 @@ def send_packet(req: SenderRequest, s, ack_pkts_received, data_pkts_sent):
             # Send data packet
             s.send(pickle.dumps(data_packet))
             data_pkts_sent += 1
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print("Data packets sent: {}".format(data_pkts_sent))
 
             # Set timeout for 10 seconds
             s.settimeout(10)
@@ -150,18 +154,19 @@ def send_packet(req: SenderRequest, s, ack_pkts_received, data_pkts_sent):
             # Receive ack packet
             receive_ack(s)
             ack_pkts_received += 1
-
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print("Data packets sent: {}".format(data_pkts_sent))
             print("ACK packets received: {}".format(ack_pkts_received))
 
     except TimeoutError as e:
         handle_timeout_error(s, data_packet, ack_pkts_received, data_pkts_sent)
-        send_packet(req, s, ack_pkts_received, data_pkts_sent)
+        acks = ack_pkts_received + 1
+        data = data_pkts_sent + 1
+        send_packet(req, s, acks, data)
 
 
 def handle_timeout_error(sock, packet, ack_pkts_received, data_pkts_sent):
     # Recursive handler that keeps retransmitting data
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 
     # 10 seconds are up!
     print("Handling Timeout")
@@ -172,6 +177,7 @@ def handle_timeout_error(sock, packet, ack_pkts_received, data_pkts_sent):
         sock.send(pickle.dumps(packet))
         print("Packet retransmitted ... ")
         data_pkts_sent += 1
+        print("Data packets sent: {}".format(data_pkts_sent))
 
         # Set timeout for 10 seconds
         sock.settimeout(10)
@@ -179,10 +185,7 @@ def handle_timeout_error(sock, packet, ack_pkts_received, data_pkts_sent):
         # Receive ack packet
         receive_ack(sock)
         ack_pkts_received += 1
-        #print(packet)
-
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print("Data packets sent: {}".format(data_pkts_sent))
+        # print(packet)
         print("ACK packets received: {}".format(ack_pkts_received))
 
     except TimeoutError as e:

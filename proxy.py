@@ -16,13 +16,20 @@ And then Sender.
 
 import argparse
 import socket
+import os
 import pickle
 import random
+import time
 
 from request import ProxyRequest
+from matplotlib import pyplot as plt
 
-PROXY_HOST = '192.168.1.122'
+PROXY_HOST = '192.168.1.138'
 MAX_INCOMING_CONNECTIONS = 999
+timer = []
+start_time = time.time()
+data = []
+
 
 def setup_proxy_cmd_request() -> ProxyRequest:
     # Command line arguments
@@ -100,10 +107,17 @@ def receive_and_drop_data(client_socket, receiver_socket):
 
         # Receive data packets from sender
         received_message = pickle.loads(client_socket.recv(2048))
-        print(received_message.data)
+        # print(received_message.data)
         received_packets.append(received_message)
         # print("Received packets list: {}" .format(received_packets))
+
+        current_time = time.time() - start_time
+        timer.append(current_time)
+        data.append(received_message.data)
+        generate_graph(timer, data)
+
         data_pkt += 1
+        os.system('cls' if os.name == 'nt' else 'clear')
         print("Data packets received: {}".format(data_pkt))
 
         # if received_message in received_packets:
@@ -111,10 +125,12 @@ def receive_and_drop_data(client_socket, receiver_socket):
             received_packets.remove(received_message)
             dropped_data_pkt += 1
             print("Data packets dropped: {}".format(dropped_data_pkt))
+            print("Data packets sent to receiver: {}".format(sent_data_pkt))
 
         if received_message in received_packets:
             receiver_socket.send(pickle.dumps(received_message))
             sent_data_pkt += 1
+            print("Data packets dropped: {}".format(dropped_data_pkt))
             print("Data packets sent to receiver: {}".format(sent_data_pkt))
             ack_pkt += 1
             print("ACK packets received: {}".format(ack_pkt))
@@ -150,12 +166,22 @@ def receive_and_drop_acks(client_socket, receiver_socket, drop_ack_packets, drop
 
 def receive_ack(sock):
     ack_packet = pickle.loads(sock.recv(1024))
-    if ack_packet.ack == "ACK":
-        print("ACK")
-    else:
-        print("No ACK Received")
+    # if ack_packet.ack == "ACK":
+    #    print("ACK")
+    # else:
+    #    print("No ACK Received")
 
     return ack_packet
+
+
+def generate_graph(x, y):
+    plt.title("Data Transfer")
+    plt.ylabel("Data")
+    plt.xlabel("Time")
+    plt.plot(x, y)
+    plt.draw()
+    plt.pause(0.001)
+
 
 def main():
     requests = setup_proxy_cmd_request()

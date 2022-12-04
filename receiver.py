@@ -55,13 +55,14 @@ def execute_requests(req):
             data_pkt_received += 1
 
             # Print to console
-            print(f"'{address[0]}': {packet.data}")
+            # print(f"'{address[0]}': {packet.data}")
 
             # Send acks back for data received
             send_back_ack(client_socket, packet)
             ack_pkt_sent += 1
 
             os.system('cls' if os.name == 'nt' else 'clear')
+            print(f"'{address[0]}': {packet.data}")
             print("Data packets received: {}".format(data_pkt_received))
             print("Ack packets sent: {}".format(ack_pkt_sent))
 
