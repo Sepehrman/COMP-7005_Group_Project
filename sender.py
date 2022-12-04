@@ -37,7 +37,7 @@ def setup_sender_cmd_request() -> SenderRequest:
                         required=False, default=DEFAULT_PORT, type=int)
     parser.add_argument("-i", "--stdin", help="IP Address of the next host (receiver/proxy)",
                         required=True, type=str)
-    parser.add_argument("-f", "--file", help="A file or string")
+    # parser.add_argument("-f", "--file", help="A file or string")
 
     try:
         # Execute the parse_args() method
@@ -48,18 +48,18 @@ def setup_sender_cmd_request() -> SenderRequest:
 
         req.port = args.port
         req.next_host = args.stdin
-        req.file = args.file
+        # req.file = args.file
 
         # Check if argument is a file or string or if no argument was provided.
-        if req.file is not None and is_file(req.file):
-            # Open and read file
-            with open(req.file, "r") as file:
-                data = file.read()
-                # Set object payload to the data in file
-                req.payload = data
-                print(req.payload)
-        elif req.file is not None and not is_file(req.file):
-            req.payload = req.file
+        # if req.file is not None and is_file(req.file):
+        #     # Open and read file
+        #     with open(req.file, "r") as file:
+        #         data = file.read()
+        #         # Set object payload to the data in file
+        #         req.payload = data
+        #         print(req.payload)
+        # elif req.file is not None and not is_file(req.file):
+        #     req.payload = req.file
 
         return req
 
@@ -68,9 +68,9 @@ def setup_sender_cmd_request() -> SenderRequest:
         quit()
 
 
-def is_file(file):
-    # Checks to see if the argument is a file and returns bool.
-    return os.path.isfile(file)
+# def is_file(file):
+#     # Checks to see if the argument is a file and returns bool.
+#     return os.path.isfile(file)
 
 
 def execute_request(req: SenderRequest):
@@ -107,17 +107,17 @@ def send_packet(req: SenderRequest, s, ack_pkts_received, data_pkts_sent):
     # Initialize a data packet object
     data_packet = Packet()
     try:
-        # If a file is provided, req.payload is data from file.
-        if req.payload:
-
-            data = req.payload.split('\n')
-            #print(data)
-            for word in data:
-                data_packet.data = word
-                data_pkts_sent += 1
-                send_packet(req, s, ack_pkts_received, data_pkts_sent)
-                s.settimeout(10)
-                receive_ack(s)
+        # # If a file is provided, req.payload is data from file.
+        # if req.payload:
+        #
+        #     data = req.payload.split('\n')
+        #     #print(data)
+        #     for word in data:
+        #         data_packet.data = word
+        #         data_pkts_sent += 1
+        #         send_packet(req, s, ack_pkts_received, data_pkts_sent)
+        #         s.settimeout(10)
+        #         receive_ack(s)
 
         #s.send(pickle.dumps(packet))
 
@@ -128,17 +128,17 @@ def send_packet(req: SenderRequest, s, ack_pkts_received, data_pkts_sent):
             # print(data_packet.data)
 
             # Check if input is a file
-            if is_file(data_packet.data):
-                # Open and read file
-                with open(data_packet.data, "r") as file:
-                    data = file.read()
-                    data_packet.data = data
+            # if is_file(data_packet.data):
+            #     # Open and read file
+            #     with open(data_packet.data, "r") as file:
+            #         data = file.read()
+            #         data_packet.data = data
 
             # os.system('cls' if os.name == 'nt' else 'clear')
 
             # Send data packet
-            s.send(pickle.dumps(data_packet))
             data_pkts_sent += 1
+            s.send(pickle.dumps(data_packet))
             os.system('cls' if os.name == 'nt' else 'clear')
             print("Data packets sent: {}".format(data_pkts_sent))
 
@@ -158,8 +158,8 @@ def send_packet(req: SenderRequest, s, ack_pkts_received, data_pkts_sent):
 
     except TimeoutError as e:
         handle_timeout_error(s, data_packet, ack_pkts_received, data_pkts_sent)
-        acks = ack_pkts_received + 1
-        data = data_pkts_sent + 1
+        acks = ack_pkts_received
+        data = data_pkts_sent
         send_packet(req, s, acks, data)
 
 
@@ -193,7 +193,6 @@ def handle_timeout_error(sock, packet, ack_pkts_received, data_pkts_sent):
 
 
 def main():
-    #os.system('cls' if os.name == 'nt' else 'clear')
     request = setup_sender_cmd_request()
     execute_request(request)
 
