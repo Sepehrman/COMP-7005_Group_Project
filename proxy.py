@@ -24,7 +24,7 @@ import time
 from request import ProxyRequest
 from matplotlib import pyplot as plt
 
-PROXY_HOST = '192.168.1.138'
+PROXY_HOST = '127.0.0.1'
 MAX_INCOMING_CONNECTIONS = 999
 timer = []
 start_time = time.time()
